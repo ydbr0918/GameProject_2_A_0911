@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -28,6 +29,12 @@ public class PlayerController : MonoBehaviour
     private float currentSpeed;
     private bool isRunning = false;
 
+    public int maxHP = 100;
+
+    private int currentHP;
+
+    public Slider hpSlider;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -36,11 +43,18 @@ public class PlayerController : MonoBehaviour
 
         defaultFOV = virtualCam.m_Lens.FieldOfView;
         currentSpeed = walkSpeed;
+
+        currentHP = maxHP;
+        hpSlider.value = 1f;
     }
 
     void Update()
     {
-      
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            pov.m_HorizontalAxis.Value = transform.eulerAngles.y;
+            pov.m_VerticalAxis.Value = 0f;
+        }
         if (camSwitcher != null && camSwitcher.usingFreeLook)
         {
             controller.Move(Vector3.zero); // 강제로 움직임 차단
@@ -99,5 +113,21 @@ public class PlayerController : MonoBehaviour
         // 중력
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHP -= damage;
+        hpSlider.value = (float)currentHP / maxHP;
+
+        if (currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Destroy(gameObject);
     }
 }
